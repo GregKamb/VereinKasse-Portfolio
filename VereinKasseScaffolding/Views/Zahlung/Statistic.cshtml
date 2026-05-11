@@ -1,0 +1,158 @@
+﻿@using System.Text.Json
+@model VereinKasseScaffolding.Models.KassaStatisticVm
+
+@{
+    ViewData["Title"] = "Statistic";
+}
+
+<h1>Finanzübersicht & Statistik</h1>
+
+<div class="card mb-4 p-3 bg-light">
+    <form method="get" asp-action="Statistic" class="row g-2 align-items-end">
+
+        <div class="col-md-4">
+            <label class="form-label">Mitglied</label>
+            <select name="mitgliedId" class="form-select">
+                <option value="0">Alle Mitglieder</option>
+                @foreach (var m in Model.AlleMitglieder)
+                {
+                    // Κρατάμε επιλεγμένο αυτό που διάλεξε ο χρήστης
+                    <option value="@m.Id" selected="@(Model.MitgliedId == m.Id)">
+                        @m.Nachname @m.Vorname
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Von</label>
+            <input type="date" name="datumVon"
+                   value="@Model.DatumVon?.ToString("yyyy-MM-dd")"
+                   class="form-control" />
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Bis</label>
+            <input type="date" name="datumBis"
+                   value="@Model.DatumBis?.ToString("yyyy-MM-dd")"
+                   class="form-control" />
+        </div>
+
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Aktualisieren</button>
+        </div>
+    </form>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3 h-100">
+            <div class="card-header">Einnahmen (Einzahlungen)</div>
+            <div class="card-body">
+                <h2 class="card-title">@Model.EinnahmenSumme.ToString("C")</h2>
+                <p class="card-text">Anzahl: @Model.EinnahmenAnzahl Transaktionen</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card text-white bg-danger mb-3 h-100">
+            <div class="card-header">Ausgaben (Auszahlungen)</div>
+            <div class="card-body">
+                <h2 class="card-title">@Model.AusgabenSumme.ToString("C")</h2>
+                <p class="card-text">Anzahl: @Model.AusgabenAnzahl Transaktionen</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3 h-100">
+            <div class="card-header">Bilanz (Saldo)</div>
+            <div class="card-body">
+                <h2 class="card-title">@Model.BilanzSumme.ToString("C")</h2>
+                <p class="card-text">Gesamt: @Model.BilanzAnzahl Transaktionen</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-success text-white">
+                Top 5 Einnahmen
+            </div>
+            <div class="card-body">
+                <canvas id="chartEin"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-danger text-white">
+                Top 5 Ausgaben
+            </div>
+            <div class="card-body">
+                <canvas id="chartAus"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // --- 1. Γράφημα Εισπράξεων (Einzahlungen) ---
+    const ctxEin = document.getElementById('chartEin');
+
+    // Παίρνουμε τα δεδομένα από το Model και τα κάνουμε JSON
+    const labelsEin = @Html.Raw(JsonSerializer.Serialize(Model.Top5EinLabels));
+    const valuesEin = @JsonSerializer.Serialize(Model.Top5EinValues);
+
+    new Chart(ctxEin, {
+        type: 'bar', // doughnut, bar, pie, line
+        data: {
+            labels: labelsEin,
+            datasets: [{
+                label: 'Betrag (€)',
+                data: valuesEin,
+                backgroundColor: '#28a745', // Πράσινο
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y', // Οριζόντιες μπάρες (πιο ευανάγνωστα ονόματα)
+            responsive: true,
+            plugins: {
+                legend: { display: false } // Κρύβουμε το υπόμνημα
+            }
+        }
+    });
+
+    // --- 2. Γράφημα Πληρωμών (Auszahlungen) ---
+    const ctxAus = document.getElementById('chartAus');
+
+    const labelsAus = @Html.Raw(JsonSerializer.Serialize(Model.Top5AusLabels));
+    const valuesAus = @JsonSerializer.Serialize(Model.Top5AusValues);
+
+    new Chart(ctxAus, {
+        type: 'bar',
+        data: {
+            labels: labelsAus,
+            datasets: [{
+                label: 'Betrag (€)',
+                data: valuesAus,
+                backgroundColor: '#dc3545', // Κόκκινο
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y', // Οριζόντιες μπάρες
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+</script>

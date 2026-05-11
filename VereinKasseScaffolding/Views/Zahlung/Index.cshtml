@@ -1,0 +1,115 @@
+﻿@model VereinKasseScaffolding.Models.ZahlungIndexVm
+
+@{
+    ViewData["Title"] = "Διαχείριση Ταμείου";
+}
+
+<h1>Kasse</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-success">Νeue Transaktion</a>
+</p>
+
+<div class="card mb-3 p-3 bg-light">
+    <form method="get" asp-action="Index" class="row g-3">
+
+        <div class="col-md-3">
+            <label class="form-label">Beschreibung</label>
+            <input type="text" name="search" value="@Model.Suchbegriff" class="form-control" placeholder="..." />
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Transaktionstyp</label>
+            <select name="typeFilter" class="form-select">
+                <!option value="0" @(Model.TypeFilter == 0 ? "selected" : "")>Alle</!option>
+                <!option value="1" @(Model.TypeFilter == 1 ? "selected" : "")>Einzahlung</!option>
+                <!option value="2" @(Model.TypeFilter == 2 ? "selected" : "")>Auszahlung</!option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Mitglied</label>
+            <select name="mitgliedId" class="form-select">
+                <option value="0">Alle Mitglieder</option>
+                @foreach (var m in Model.Mitglieder)
+                {
+                    // Ελέγχουμε αν αυτό το μέλος ήταν επιλεγμένο πριν
+                    <!option value="@m.Id" @(Model.MitgliedId == m.Id ? "selected" : "")>
+                    @m.Vorname @m.Nachname
+                    </!option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Von</label>
+            <input type="date" name="DatumVon"
+                   value="@Model.DatumVon?.ToString("yyyy-MM-dd")"
+                   class="form-control" />
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Bis</label>
+            <input type="date" name="DatumBis"
+                   value="@Model.DatumBis?.ToString("yyyy-MM-dd")"
+                   class="form-control" />
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Anzahl Einträge</label>
+            <select name="numEinträge" class="form-select">
+                <option selected="@(Model.NumEinträge == 0)">Alle</option>
+                <option selected="@(Model.NumEinträge == 5)">5</option>
+                <option selected="@(Model.NumEinträge == 10)">10</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100 mb-2">Suchen</button>
+            <a asp-action="Index" class="btn btn-danger w-100 btn-sm mt-2">Reset</a>
+        </div>
+    </form>
+</div>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Datum</th>
+            <th>Beschreibung</th>
+            <th>Mitglied</th>
+            <th>Betrag</th>
+            <th>Art</th>
+            <th>Aktionen</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Zahlungen)
+        {
+            <tr>
+                <td>@item.Datum.ToShortDateString()</td>
+                <td>@item.Beschreibung</td>
+
+                <td>@item.Mitglied?.Nachname @item.Mitglied?.Vorname</td>
+
+                <td style="font-weight: bold; color: @(item.IstEinzahung ? "green" : "red")">
+                    @item.Betrag.ToString("C")
+                </td>
+
+                <td>
+                    @if (item.IstEinzahung)
+                    {
+                        <span class="badge bg-success">Einzahlung</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Auszahlung</span>
+                    }
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,104 @@
+﻿@model VereinKasseScaffolding.Models.MitgliedIndexVm
+
+@{
+    ViewData["Title"] = "Μέλη";
+}
+
+<h1>Vereinsmitglieder</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-success">Neues Mitglied</a>
+</p>
+
+<div class="card mb-3 p-3 bg-light">
+    <form method="get" asp-action="Index" class="row g-3">
+
+        <div class="col-md-6">
+            <label class="form-label">Namenssuche</label>
+            <input type="text" name="search" value="@Model.Suchbegriff" class="form-control" placeholder="Vorname oder Nachname..." />
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label">Status</label>
+            <select name="filterStatus" class="form-select">
+                <!option value="0" @(Model.FilterStatus == 0 ? "selected" : "")>Alle</!option>
+                <!option value="1" @(Model.FilterStatus == 1 ? "selected" : "")>Aktiv</!option>
+                <!option value="2" @(Model.FilterStatus == 2 ? "selected" : "")>Inaktiv</!option>
+            </select>
+            <div class="col-md-4">
+                <label class="form-label">Von</label>
+                <input type="date" name="DatumVon"
+                 value="@Model.DatumVon?.ToString("yyyy-MM-dd")" 
+                 class="form-control"/>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Bis</label>
+                <input type="date" name="DatumBis" 
+                 value="@Model.DatumBis?.ToString("yyyy-MM-dd")" 
+                 class="form-control"/>
+            </div>
+        </div>
+
+        <div class="col-md-2 ">
+            <button type="submit" class="btn btn-primary w-100 mb-2 ">Suchen</button>
+            <a asp-action="Index" class="btn btn-danger w-100 btn-sm">Reset</a>
+        </div>
+    </form>
+</div>
+
+<table class="table table-striped table-hover align-middle">
+    <thead>
+        <tr>
+            <th>Bild</th>
+            <th>Vorname</th>
+            <th>Nachname</th>
+            <th>Mitglied Seit</th>
+            <th>Status</th>
+            <th>Aktionen</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Mitglieder.Count == 0)
+        {
+            <tr>
+                <td colspan="6" class="text-center text-muted">Keine Ergebnisse.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var item in Model.Mitglieder)
+            {
+                <tr>
+                    <td>
+                        @if (!string.IsNullOrEmpty(item.Bild))
+                        {
+                            <img src="@item.Bild" alt="Bild von @item.Vorname" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <span class="text-muted small">Kein Bild</span>
+                        }
+                    </td>
+                    <td>@item.Vorname</td>
+                    <td>@item.Nachname</td>
+                    <td>@item.Eintrittsdatum.ToShortDateString()</td>
+                    <td>
+                        @if (item.IstAktiv)
+                        {
+                            <span class="badge bg-success">Aktiv</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Inaktiv</span>
+                        }
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

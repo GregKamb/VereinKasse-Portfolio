@@ -1,0 +1,69 @@
+﻿@using System.Text.Json
+@model VereinKasseScaffolding.Models.StatisticVm
+
+@{
+    ViewData["Title"] = "Statistik";
+}
+
+<h1>Statistik</h1>
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                Aktiv vs Inaktiv
+            </div>
+            <div class="card-body">
+                <canvas id="myChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+    const leinwand = document.getElementById('myChart');
+
+    var dataLabels= @Html.Raw(JsonSerializer.Serialize(Model.DataLabels));
+    var dataValues =@JsonSerializer.Serialize(Model.DataValues);
+
+    new Chart(leinwand, {
+        type: 'doughnut', // bar, pie, line
+        data: {
+            labels: dataLabels,
+            datasets: [{
+                label: 'Mitglieder',
+                data: dataValues,
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 99, 132, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 99, 132, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Aktive vs Inaktive Mitglieder'
+                }
+            }
+        },
+    });
+    
+
+</script>
+
+
+
+
